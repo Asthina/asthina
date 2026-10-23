@@ -1,1 +1,405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PrePayment Insentif MT Coach - Centralized CMS</title>
+    
+    <!-- Menggunakan Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    
+    <!-- Menggunakan Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6', // Warna aksen teal/cyan khas dashboard modern
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icon pack -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
 
+    <!-- ================= LOGIN SCREEN ================= -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+            <div>
+                <div class="w-12 h-12 bg-brand-500 rounded-lg flex items-center justify-center mx-auto text-white font-bold text-xl shadow-md">
+                    CMS
+                </div>
+                <h2 class="mt-4 text-center text-2xl font-extrabold text-gray-900">
+                    Centralized CMS
+                </h2>
+                <p class="mt-2 text-center text-sm text-gray-600">
+                    Masuk ke Sistem PrePayment Insentif MT Coach
+                </p>
+            </div>
+            
+            <div id="login-error-msg" class="hidden p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-xs text-center font-medium">
+                Email atau kata sandi tidak valid / tidak terdaftar dalam Spreadsheet!
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="mt-4 space-y-6">
+                <div class="rounded-md space-y-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
+                        <div class="relative">
+                            <i data-lucide="mail" class="w-5 h-5 absolute left-3 top-2.5 text-gray-400"></i>
+                            <input id="email" name="email" type="email" value="odita.ogayasa@ruangguru.com" required class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" placeholder="nama@ruangguru.com">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="w-5 h-5 absolute left-3 top-2.5 text-gray-400"></i>
+                            <input id="password" name="password" type="password" value="123456" required class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500" placeholder="••••••••">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center text-gray-600">
+                        <input type="checkbox" checked class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 mr-2">
+                        Ingat Saya
+                    </label>
+                    <a href="#" onclick="alert('Silakan cek daftar kredensial pada Spreadsheet.')" class="font-medium text-brand-600 hover:text-brand-500">Lupa password?</a>
+                </div>
+
+                <div>
+                    <button type="submit" id="btn-login" class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors">
+                        Masuk / Login
+                    </button>
+                </div>
+                <div class="text-xs text-center text-gray-400 space-y-1">
+                    <p>🔒 Validasi Otomatis berdasarkan Spreadsheet Google Sheets.</p>
+                    <p class="text-[10px] text-gray-400 truncate max-w-xs mx-auto">Sheet ID: 1kFCp8bqH9zFlQOLmGbR5W4cnKV_1QgijSLpcVY493iA</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= DASHBOARD MAIN APP (Hidden by default) ================= -->
+    <div id="dashboard-screen" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200">
+                <span class="text-lg font-bold text-gray-900 tracking-tight">Centralized CMS</span>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <ul class="space-y-1 px-3">
+                    <li>
+                        <a href="#" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-gray-400"></i>
+                            Dashboard Utama
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-brand-50 text-brand-600">
+                            <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-3 text-brand-500"></i>
+                            PrePayment Insentif
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                            <i data-lucide="users" class="w-5 h-5 mr-3 text-gray-400"></i>
+                            Data MT Coach
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                            <i data-lucide="calendar" class="w-5 h-5 mr-3 text-gray-400"></i>
+                            BAC Schedule
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- TOP HEADER -->
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-800">Laporan PrePayment Insentif MT Coach</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-400 hover:text-gray-500 transition-colors p-1 rounded-full hover:bg-gray-100">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                    </button>
+                    <div class="flex items-center space-x-2 border-l pl-4 border-gray-200">
+                        <div id="user-avatar" class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white font-bold text-sm">
+                            OO
+                        </div>
+                        <span id="user-display-name" class="text-sm font-medium text-gray-700 hidden sm:block">Odita Ogayasa</span>
+                        <button onclick="handleLogout()" title="Keluar / Logout" class="ml-2 text-gray-400 hover:text-red-600 p-1 rounded-md transition-colors">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- DASHBOARD CONTENT -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+                
+                <!-- SUMMARY CARDS -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total MT Coach (Aktif)</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1">142</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 rounded-full">
+                                <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Estimasi Insentif (Bulan Ini)</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1">Rp 124.500.000</p>
+                            </div>
+                            <div class="p-3 bg-brand-50 rounded-full">
+                                <i data-lucide="wallet" class="w-6 h-6 text-brand-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Menunggu Approval</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1">18 <span class="text-sm font-normal text-gray-500">Pengajuan</span></p>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-full">
+                                <i data-lucide="clock" class="w-6 h-6 text-amber-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE SECTION -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <!-- Table Header & Filters -->
+                    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" placeholder="Cari nama coach..." class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <select class="border border-gray-300 rounded-md text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option>Oktober 2026</option>
+                                <option>September 2026</option>
+                            </select>
+                            <select class="border border-gray-300 rounded-md text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <option>Semua Regional</option>
+                                <option>Bandung</option>
+                                <option>Jakarta</option>
+                                <option>Banten</option>
+                            </select>
+                            <button class="bg-brand-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-700 transition-colors flex items-center">
+                                <i data-lucide="download" class="w-4 h-4 mr-2"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3">Nama MT Coach</th>
+                                    <th class="px-6 py-3">Regional / Cabang</th>
+                                    <th class="px-6 py-3 text-center">Total Sesi</th>
+                                    <th class="px-6 py-3 text-right">Nominal Insentif</th>
+                                    <th class="px-6 py-3 text-center">Status</th>
+                                    <th class="px-6 py-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- Baris Data 1 -->
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="font-medium text-gray-900">Budi Santoso</div>
+                                        <div class="text-xs text-gray-500">budi.santoso@ruangguru.com</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Bandung<br><span class="text-xs text-gray-500">BAC Dago</span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">24</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900">Rp 1.200.000</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="px-2.5 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">Approved</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <button class="text-brand-600 hover:text-brand-800 text-sm font-medium">Detail</button>
+                                    </td>
+                                </tr>
+                                <!-- Baris Data 2 -->
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="font-medium text-gray-900">Siti Aminah</div>
+                                        <div class="text-xs text-gray-500">siti.aminah@ruangguru.com</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Tangerang<br><span class="text-xs text-gray-500">BAC BSD</span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">18</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right font-medium text-gray-900">Rp 900.000</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">Pending</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <button class="text-brand-600 hover:text-brand-800 text-sm font-medium">Review</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination (Static Dummy) -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between text-sm">
+                        <span class="text-gray-500">Menampilkan 1 hingga 2 dari 142 entri</span>
+                        <div class="flex gap-1">
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>Sebelumnya</button>
+                            <button class="px-3 py-1 border border-brand-500 bg-brand-50 text-brand-700 rounded-md font-medium">1</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">3</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">Selanjutnya</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Script Kontrol Login/Logout -->
+    <script>
+        // ID Google Sheet & CSV Export URL
+        const sheetId = '1kFCp8bqH9zFlQOLmGbR5W4cnKV_1QgijSLpcVY493iA';
+        const sheetCsvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+
+        // Default dataset cadangan jika terjadi masalah CORS / akses spreadsheet tertutup
+        let userDatabase = [
+            { name: "Odita Ogayasa", email: "odita.ogayasa@ruangguru.com", password: "123" },
+            { name: "Odita Ogayasa", email: "odita.ogayasa@ruangguru.com", password: "••••••••" },
+            { name: "Admin Ruangguru", email: "admin@ruangguru.com", password: "admin" }
+        ];
+
+        // Inisialisasi Lucide Icon
+        lucide.createIcons();
+
+        // Mengambil Data Kredensial dari Google Spreadsheet
+        async function fetchSpreadsheetUsers() {
+            try {
+                const response = await fetch(sheetCsvUrl);
+                if (response.ok) {
+                    const csvText = await response.text();
+                    const lines = csvText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                    
+                    const remoteUsers = [];
+                    // Abaikan header jika baris pertama berisi 'nama' / 'email'
+                    lines.forEach((line, index) => {
+                        const cols = line.split(',').map(cell => cell.replace(/^"(.*)"$/, '$1').trim());
+                        if (cols.length >= 3) {
+                            const name = cols[0];
+                            const email = cols[1];
+                            const password = cols[2];
+
+                            if (index === 0 && email.toLowerCase().includes('email')) {
+                                return; // Lewati header tabel
+                            }
+                            if (email && password) {
+                                remoteUsers.push({ name, email, password });
+                            }
+                        }
+                    });
+
+                    if (remoteUsers.length > 0) {
+                        userDatabase = remoteUsers;
+                        console.log('Berhasil memuat akun dari Google Sheets:', userDatabase);
+                    }
+                }
+            } catch (err) {
+                console.warn('Gagal mengambil spreadsheet secara langsung (kemungkinan CORS atau Private). Menggunakan dataset default.', err);
+            }
+        }
+
+        // Panggil penarikan data saat halaman dimuat
+        fetchSpreadsheetUsers();
+
+        // Fungsi Simulasi Login dengan Validasi Spreadsheet
+        async function handleLogin(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('email').value.trim().toLowerCase();
+            const passwordInput = document.getElementById('password').value.trim();
+            const errorMsg = document.getElementById('login-error-msg');
+            const btnLogin = document.getElementById('btn-login');
+
+            errorMsg.classList.add('hidden');
+            btnLogin.innerHTML = 'Memverifikasi...';
+            btnLogin.disabled = true;
+
+            // Coba perbarui data spreadsheet terbaru sebelum autentikasi
+            await fetchSpreadsheetUsers();
+
+            // Cari pengguna berdasarkan email & password di spreadsheet
+            const foundUser = userDatabase.find(u => 
+                u.email.toLowerCase() === emailInput && String(u.password).trim() === passwordInput
+            );
+
+            btnLogin.disabled = false;
+            btnLogin.innerHTML = 'Masuk / Login';
+
+            if (foundUser) {
+                // Set Tampilan Nama & Inisial Pengguna di Dashboard
+                const nameParts = foundUser.name ? foundUser.name.split(' ') : ['User'];
+                const initials = nameParts.length >= 2 
+                    ? (nameParts[0][0] + nameParts[1][0]).toUpperCase() 
+                    : nameParts[0].substring(0, 2).toUpperCase();
+
+                document.getElementById('user-display-name').innerText = foundUser.name || foundUser.email;
+                document.getElementById('user-avatar').innerText = initials;
+
+                // Tampilkan Screen Dashboard
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+                lucide.createIcons();
+            } else {
+                // Tampilkan Pesan Error
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        // Fungsi Logout
+        function handleLogout() {
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('password').value = '';
+            document.getElementById('login-error-msg').classList.add('hidden');
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
